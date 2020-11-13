@@ -117,7 +117,7 @@ class ArtNetwork:
         dividerV = self.e + self.norm(self.v)
         self.u = [el / dividerV for el in self.v]
         self.w = s + self.a * self.u
-        self.p = self.u + self.d * self.t_weights[J] #the one difference against update2
+        self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :) #the one difference against update2
         dividerW = self.e + self.norm(self.w)
         self.x = [el / dividerW for el in self.w]
         dividerP = self.e + self.norm(self.p)
@@ -127,7 +127,7 @@ class ArtNetwork:
     def updateWeights(self, J):
         first_multiplier = self.alfa * self.d
         second_multiplier = (1 + self.alfa * self.d * (self.d - 1))
-        self.t_weights[J] = [first_multiplier * u_i for u_i in self.u] + [second_multiplier * tJ_i for tJ_i in self.t_weights[J]]
+        self.t_weights[J] = [first_multiplier * u_i for u_i in self.u] + [second_multiplier * tJ_i for tJ_i in self.t_weights[J]] # FIX ME (probably) :)
         for i in range(self.n):
             self.w_weights[i][J] = first_multiplier * self.u[i] + second_multiplier * self.w_weights[i][J]
 
@@ -150,8 +150,8 @@ class ArtNetwork:
     def verifyForReset(self, J):
         dividerV = self.e + self.norm(self.v)
         self.u = [el / dividerV for el in self.v]
-        self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]]
-        dividends = self.u + [self.c * p_i for p_i in self.p]
+        self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :)
+        dividends = self.u + [self.c * p_i for p_i in self.p] # FIX ME :)
         divider = self.e + self.norm(self.u) + self.c * self.norm(self.p)
         r = [dividend / divider for dividend in dividends]
         return self.norm(r) < self.ro - self.e
