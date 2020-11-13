@@ -10,11 +10,11 @@ class ArtNetwork:
     s: List[int] #read input
     y: List[int] #output
     w: List[int] #pair with x [normalization]
-    x: List[int]
+    x: List[float]
     v: List[int] #pair with u [normalization]
-    u: List[int]
-    p: List[int] #pair with q [normalization]
-    q: List[int]
+    u: List[float]
+    p: List[float] #pair with q [normalization]
+    q: List[float]
 
     #parameters
     n: int #size if input

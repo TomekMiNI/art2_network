@@ -1,6 +1,8 @@
-
+import csv_parser
 from artnetwork import ArtNetwork
 
-an = ArtNetwork(5,3)
-inputs = [[1,1,1,0,1],[0,0,1,1,1],[1,0,1,0,1],[1,0,0,1,1]]
-an.train(inputs, 1)
+an = ArtNetwork(3, 3)
+data, results = csv_parser.parse_data("SN_projekt2\\klastrowanie\\cube.csv", 1)
+
+an.train(data, 1)
+print("done")
