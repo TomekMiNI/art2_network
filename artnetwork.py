@@ -193,3 +193,34 @@ class ArtNetwork:
         for v in vector:
             result += v ** 2
         return np.sqrt(result)
+
+    def test(self, inputs, labels):
+        classes = [list() for _ in range(self.current_m)]
+        elems_not_in_classes = list()
+        for s in inputs:
+            self.update1(s)
+            self.update2(s)
+            self.calculateY()
+            clustered = False
+            for trial in range(self.current_m):
+                J = self.findLargestSignal()
+                if self.verifyForReset(J):
+                    self.y[J] = -1
+                else:
+                    clustered = True
+                    classes[J].append(s)
+                    break
+            if not clustered:
+                elems_not_in_classes.append(s)
+
+        max_label = max(labels)
+        labels_matrix = [[0 for _ in range(max_label + 1)] for _ in range(self.current_m)]
+        labels_not_in_classes = [0 for _ in range(max_label + 1)]
+        for i in range(self.current_m):
+            for j in range(len(classes[i])):
+                labels_matrix[i][labels[inputs.index(classes[i][j])]] += 1
+
+        for i in range(len(elems_not_in_classes)):
+            labels_not_in_classes[labels[inputs.index(elems_not_in_classes[i])]] += 1
+
+        return labels_matrix, labels_not_in_classes

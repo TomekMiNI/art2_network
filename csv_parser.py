@@ -14,6 +14,6 @@ def parse_data(file_name: str, headers_row_count: int) -> (List[List[float]], Li
         data.append(loaded_data[i][:data_count])
         data[i - 1] = [float(i) for i in data[i - 1]]
         results.append(loaded_data[i][data_count:])
-        results[i - 1] = [int(i) for i in results[i - 1]]
+        results[i - 1] = int(results[i - 1][0])
 
     return data, results
