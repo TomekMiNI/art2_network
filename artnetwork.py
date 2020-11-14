@@ -30,7 +30,7 @@ class ArtNetwork:
     ro: float #vigilance parameter 
 
     def activation_function(self, x):
-        result = [0] * len(x)
+        result = [0 for _ in range(len(x))]
         for i in range(len(x)):
             if x[i] >= self.theta:
                 result[i] = x[i]
@@ -81,7 +81,9 @@ class ArtNetwork:
                     if self.current_m < self.m:
                         #add new class with s as a represent
                         #t_weights[every index] is 1, so lets update with current values
-                        self.updateWeights(self.current_m)
+
+                        # self.updateWeights(self.current_m)
+                        self.createWeights(self.current_m, s)
                         self.current_m += 1
                     #else: just exclude this input
 
@@ -91,9 +93,9 @@ class ArtNetwork:
         dividerS = self.e + self.norm(s)
         self.x = [el / dividerS for el in s]
         self.v = self.activation_function(self.x) #in other document x is changed later
-        self.u = [0] * self.n
-        self.p = [0] * self.n
-        self.q = [0] * self.n
+        self.u = [0 for _ in range(self.n)]
+        self.p = [0 for _ in range(self.n)]
+        self.q = [0 for _ in range(self.n)]
 
     def update2(self, s):
         dividerV = self.e + self.norm(self.v)
@@ -158,6 +160,10 @@ class ArtNetwork:
             # self.t_weights[J] = [first_multiplier * u_i for u_i in self.u] + [second_multiplier * tJ_i for tJ_i in self.t_weights[J]] # FIX ME (probably) :)
             self.w_weights[i][J] = first_multiplier * self.u[i] + second_multiplier * self.w_weights[i][J]
 
+    def createWeights(self, J, s):
+        for i in range(self.n):
+            self.t_weights[J][i] = s[i]
+
     def calculateY(self):
         for j in range(self.current_m):
             sum = 0
@@ -181,7 +187,7 @@ class ArtNetwork:
         for i in range(self.n):
             self.p[i] = self.u[i] + self.d * self.t_weights[J][i]
             # self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :)
-            dividends[i] = self.u[i] + self.c * self.p[i] # FIX ME :)
+            dividends[i] = self.u[i] + self.c * self.p[i]
             # dividends = self.u + [self.c * p_i for p_i in self.p] # FIX ME :)
 
         divider = self.e + self.norm(self.u) + self.c * self.norm(self.p)
