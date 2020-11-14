@@ -44,20 +44,20 @@ class ArtNetwork:
 
         self.w_weights = [[]] * self.n
         for i in range(self.n):
-            self.w_weights[i] = [1/(1+self.n)] * self.m
+            self.w_weights[i] = [1/(1+self.n) for _ in range(self.m)]
 
         self.t_weights = [[]] * self.m #its controlled by self.current_m
-        for t_weight in self.t_weights:
-            t_weight = [1] * self.n
+        for i in range(self.m):
+            self.t_weights[i] = [1 for _ in range(self.n)]
 
         self.a = 10
         self.b = 10
         self.c = 0.1
         self.d = 0.9
         self.e = 2.2204e-16
-        self.theta = 1/np.sqrt(self.n)
+        self.theta = 0.05 # 1/np.sqrt(self.n)
         self.alfa = 0.6
-        self.ro = 0.93
+        self.ro = 0.99
 
     def train(self, inputs, epochs):
         for epoch in range(epochs):
@@ -75,6 +75,7 @@ class ArtNetwork:
                         self.update3(s)
                         self.updateWeights(J)
                         self.update4(s, J)
+                        break
                         #the second condition to stop relates to weight changes - if there is no changes - stop.
                 if not clustered:
                     if self.current_m < self.m:
@@ -86,7 +87,7 @@ class ArtNetwork:
 
     
     def update1(self, s):
-        self.w = s
+        self.w = [si for si in s]
         dividerS = self.e + self.norm(s)
         self.x = [el / dividerS for el in s]
         self.v = self.activation_function(self.x) #in other document x is changed later
@@ -97,38 +98,64 @@ class ArtNetwork:
     def update2(self, s):
         dividerV = self.e + self.norm(self.v)
         self.u = [el / dividerV for el in self.v]
-        self.w = s + self.a * self.u
-        self.p = self.u
+        for i in range(self.n):
+            self.w[i] = s[i] + self.a * self.u[i]
+            # self.w = s + self.a * self.u
+            self.p[i] = self.u[i]
+            # self.p = self.u
+
         dividerW = self.e + self.norm(self.w)
         self.x = [el / dividerW for el in self.w]
         dividerP = self.e + self.norm(self.p)
-        self.q = [el / dividerP for el in self.p] 
-        self.v = self.activation_function(self.x) + self.b * self.activation_function(self.q)
+        self.q = [el / dividerP for el in self.p]
+
+        activated_x = self.activation_function(self.x)
+        activated_q = self.activation_function(self.q)
+        for i in range(self.n):
+            self.v[i] = activated_x[i] + self.b * activated_q[i]
+            # self.v = self.activation_function(self.x) + self.b * self.activation_function(self.q)
 
     def update3(self, s):
-        self.w = s + self.a * self.u
+        for i in range(self.n):
+            self.w[i] = s[i] + self.a * self.u[i]
+            # self.w = s + self.a * self.u
         dividerW = self.e + self.norm(self.w)
         self.x = [el / dividerW for el in self.w]
         dividerP = self.e + self.norm(self.p)
-        self.q = [el / dividerP for el in self.p] 
-        self.v = self.activation_function(self.x) + self.b * self.activation_function(self.q)
+        self.q = [el / dividerP for el in self.p]
+
+        activated_x = self.activation_function(self.x)
+        activated_q = self.activation_function(self.q)
+        for i in range(self.n):
+            self.v[i] = activated_x[i] + self.b * activated_q[i]
+            # self.v = self.activation_function(self.x) + self.b * self.activation_function(self.q)
 
     def update4(self, s, J):
         dividerV = self.e + self.norm(self.v)
         self.u = [el / dividerV for el in self.v]
-        self.w = s + self.a * self.u
-        self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :) #the one difference against update2
+        for i in range(self.n):
+            self.w[i] = s[i] + self.a * self.u[i]
+            # self.w = s + self.a * self.u
+            self.p[i] = self.u[i] + self.d * self.t_weights[J][i]
+            # self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :) #the one difference against update2
         dividerW = self.e + self.norm(self.w)
         self.x = [el / dividerW for el in self.w]
         dividerP = self.e + self.norm(self.p)
-        self.q = [el / dividerP for el in self.p] 
-        self.v = self.activation_function(self.x) + self.b * self.activation_function(self.q)
+        self.q = [el / dividerP for el in self.p]
+
+        activated_x = self.activation_function(self.x)
+        activated_q = self.activation_function(self.q)
+        for i in range(self.n):
+            self.v[i] = activated_x[i] + self.b * activated_q[i]
+            # self.v = self.activation_function(self.x) + self.b * self.activation_function(self.q)
 
     def updateWeights(self, J):
         first_multiplier = self.alfa * self.d
         second_multiplier = (1 + self.alfa * self.d * (self.d - 1))
-        self.t_weights[J] = [first_multiplier * u_i for u_i in self.u] + [second_multiplier * tJ_i for tJ_i in self.t_weights[J]] # FIX ME (probably) :)
+
         for i in range(self.n):
+            self.t_weights[J][i] = first_multiplier * self.u[i] + second_multiplier * self.t_weights[J][i]
+            # self.t_weights[J] = [first_multiplier * u_i for u_i in self.u] + [second_multiplier * tJ_i for tJ_i in self.t_weights[J]] # FIX ME (probably) :)
             self.w_weights[i][J] = first_multiplier * self.u[i] + second_multiplier * self.w_weights[i][J]
 
     def calculateY(self):
@@ -150,8 +177,13 @@ class ArtNetwork:
     def verifyForReset(self, J):
         dividerV = self.e + self.norm(self.v)
         self.u = [el / dividerV for el in self.v]
-        self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :)
-        dividends = self.u + [self.c * p_i for p_i in self.p] # FIX ME :)
+        dividends = [0.0] * self.n
+        for i in range(self.n):
+            self.p[i] = self.u[i] + self.d * self.t_weights[J][i]
+            # self.p = self.u + [self.d * tJ_i for tJ_i in self.t_weights[J]] # FIX ME :)
+            dividends[i] = self.u[i] + self.c * self.p[i] # FIX ME :)
+            # dividends = self.u + [self.c * p_i for p_i in self.p] # FIX ME :)
+
         divider = self.e + self.norm(self.u) + self.c * self.norm(self.p)
         r = [dividend / divider for dividend in dividends]
         return self.norm(r) < self.ro - self.e
@@ -160,4 +192,4 @@ class ArtNetwork:
         result = 0
         for v in vector:
             result += v ** 2
-        return result
+        return np.sqrt(result)
