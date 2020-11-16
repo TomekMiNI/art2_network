@@ -1,12 +1,17 @@
 import csv_parser
+import MNIST_parser
 from artnetwork import ArtNetwork
 
-an = ArtNetwork(2, 20)
-data, results = csv_parser.parse_data("SN_projekt2\\klastrowanie\\hexagon.csv", 1)
-#data = [[1, 0, 0], [0.99, 0, 0], [0, 1, 0], [0, 0.99, 0], [0, 0, 1], [0, 0, 0.99]]
-#results = [0, 0, 1, 1, 2, 2]
-an.train(data, 10)
-labels_matrix, labels_not_clustered = an.test(data, results)
+an = ArtNetwork(784, 20)
+
+images = MNIST_parser.parse_images("train-images.idx3-ubyte")
+images_vectors = MNIST_parser.convert_image_to_vector(images, range(len(images)))
+
+test_images = MNIST_parser.parse_images("t10k-images.idx3-ubyte")
+test_labels = MNIST_parser.parse_labels("t10k-labels.idx1-ubyte")
+test_images_vectors = MNIST_parser.convert_image_to_vector(test_images, range(len(test_images)))
+an.train(images_vectors, 1)
+labels_matrix, labels_not_clustered = an.test(test_images_vectors, test_labels)
 print("Real classes in network classes")
 for i in range(len(labels_matrix)):
     print(labels_matrix[i])
