@@ -45,7 +45,7 @@ class ArtNetwork:
 
         self.w_weights = [[]] * self.n
         for i in range(self.n):
-            self.w_weights[i] = [0 for _ in range(self.m)]
+            self.w_weights[i] = [1/self.n for _ in range(self.m)]
 
         self.t_weights = [[]] * self.m #its controlled by self.current_m
         for i in range(self.m):
@@ -58,7 +58,7 @@ class ArtNetwork:
         self.e = 2.2204e-16
         self.theta = 0.05 # 1/np.sqrt(self.n)
         self.alfa = 0.6
-        self.ro = 0.93
+        self.ro = 0.967
         self.ls = 5
 
     def train(self, inputs, epochs):
@@ -182,10 +182,11 @@ class ArtNetwork:
         return self.norm(r) < self.ro - self.e
 
     def norm(self, vector):
-        result = 0
-        for v in vector:
-            result += v ** 2
-        return np.sqrt(result)
+        return np.linalg.norm(vector)
+        # result = 0
+        # for v in vector:
+        #    result += v ** 2
+        # return np.sqrt(result)
 
     def test(self, inputs, labels):
         classes = [list() for _ in range(self.current_m)]
@@ -215,9 +216,5 @@ class ArtNetwork:
 
         for i in range(len(elems_not_in_classes)):
             labels_not_in_classes[labels[inputs.index(elems_not_in_classes[i])]] += 1
-
-        for labels in labels_matrix:
-            if max(labels) == 0:
-                labels_matrix.remove(labels)
 
         return labels_matrix, labels_not_in_classes
