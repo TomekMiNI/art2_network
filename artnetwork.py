@@ -45,20 +45,20 @@ class ArtNetwork:
 
         self.w_weights = [[]] * self.n
         for i in range(self.n):
-            self.w_weights[i] = [1/self.n for _ in range(self.m)]
+            self.w_weights[i] = [1/(1+self.n) for _ in range(self.m)]
 
         self.t_weights = [[]] * self.m #its controlled by self.current_m
         for i in range(self.m):
-            self.t_weights[i] = [1 for _ in range(self.n)]
+            self.t_weights[i] = [0 for _ in range(self.n)]
 
         self.a = 10
         self.b = 10
         self.c = 0.1
         self.d = 0.9
         self.e = 2.2204e-16
-        self.theta = 0.05 # 1/np.sqrt(self.n)
+        self.theta = 0.01 #1/np.sqrt(self.n)
         self.alfa = 0.6
-        self.ro = 0.967
+        self.ro = 0.91
         self.ls = 5
 
     def train(self, inputs, epochs):
@@ -191,6 +191,8 @@ class ArtNetwork:
     def test(self, inputs, labels):
         classes = [list() for _ in range(self.current_m)]
         elems_not_in_classes = list()
+        idx = 0
+        print("Count of clusters: ", self.current_m)
         for s in inputs:
             self.update1(s)
             self.update2(s)
@@ -202,19 +204,20 @@ class ArtNetwork:
                     self.y[J] = -1
                 else:
                     clustered = True
-                    classes[J].append(s)
+                    classes[J].append(idx)
                     break
             if not clustered:
-                elems_not_in_classes.append(s)
+                elems_not_in_classes.append(idx)
+            idx += 1
 
         max_label = max(labels)
         labels_matrix = [[0 for _ in range(max_label + 1)] for _ in range(self.current_m)]
         labels_not_in_classes = [0 for _ in range(max_label + 1)]
         for i in range(self.current_m):
             for j in range(len(classes[i])):
-                labels_matrix[i][labels[inputs.index(classes[i][j])]] += 1
+                labels_matrix[i][labels[classes[i][j]]] += 1
 
         for i in range(len(elems_not_in_classes)):
-            labels_not_in_classes[labels[inputs.index(elems_not_in_classes[i])]] += 1
+            labels_not_in_classes[labels[elems_not_in_classes[i]]] += 1
 
         return labels_matrix, labels_not_in_classes
